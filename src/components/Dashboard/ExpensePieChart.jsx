@@ -1,6 +1,6 @@
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
 
-const COLORS = ['#1A6BFF', '#16A34A', '#DC2626', '#F59E0B', '#0EA5E9', '#8B5CF6', '#14B8A6']
+const COLORS = ['#1A6BFF', '#4F8CFF', '#7AA7FF', '#A5C3FF', '#D0DEFF']
 
 const ExpensePieChart = ({ data }) => {
   return (

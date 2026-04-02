@@ -16,7 +16,7 @@ const SummaryCards = ({ summary }) => {
       {cards.map((card) => (
         <article
           key={card.key}
-          className={`rounded-2xl bg-gradient-to-br p-5 shadow-lg transition hover:-translate-y-0.5 ${cardStyles[card.key]}`}
+          className={`rounded-2xl bg-gradient-to-br p-5 shadow-lg transition-all duration-200 hover:scale-[1.01] hover:shadow-xl ${cardStyles[card.key]}`}
         >
           <p className="text-sm uppercase tracking-wider text-white/80">{card.label}</p>
           <p className="mt-2 text-3xl font-bold">${card.value.toLocaleString()}</p>

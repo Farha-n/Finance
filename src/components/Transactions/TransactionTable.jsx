@@ -6,6 +6,7 @@ const badgeStyles = {
 const TransactionTable = ({
   rows,
   hasTransactions,
+  onExport,
   role,
   searchTerm,
   onSearch,
@@ -21,6 +22,9 @@ const TransactionTable = ({
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h3 className="panel-title">Transactions</h3>
         <div className="flex flex-wrap gap-2">
+          <button onClick={onExport} className="btn-secondary">
+            Export CSV
+          </button>
           <input
             value={searchTerm}
             onChange={(event) => onSearch(event.target.value)}
@@ -59,7 +63,7 @@ const TransactionTable = ({
             </thead>
             <tbody>
               {rows.map((item) => (
-                <tr key={item.id} className="border-b border-slate-100 hover:bg-slate-50">
+                <tr key={item.id} className="border-b border-slate-100 even:bg-slate-50 hover:bg-slate-100 transition-colors">
                   <td className="px-3 py-3">{item.date}</td>
                   <td className="px-3 py-3">{item.category}</td>
                   <td className="px-3 py-3 font-semibold">${Number(item.amount).toLocaleString()}</td>

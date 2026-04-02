@@ -80,6 +80,7 @@ export const getInsights = (transactions) => {
   if (months.length >= 2) {
     const current = monthTotals[months[months.length - 1]]
     const previous = monthTotals[months[months.length - 2]]
+    // TODO: improve monthly comparison when dataset grows.
     monthlyChange = previous === 0 ? 0 : Math.round(((current - previous) / previous) * 100)
   }
 

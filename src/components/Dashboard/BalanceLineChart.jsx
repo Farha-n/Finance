@@ -10,7 +10,7 @@ import {
 
 const BalanceLineChart = ({ data }) => {
   return (
-    <section className="panel-card">
+    <section className="panel-card h-full">
       <h3 className="panel-title">Balance Trend</h3>
       {data.length === 0 ? (
         <p className="empty-message">No data available</p>

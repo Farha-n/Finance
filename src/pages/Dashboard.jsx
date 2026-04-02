@@ -57,6 +57,21 @@ const Dashboard = () => {
     setShowForm(true)
   }
 
+  const handleExportCsv = () => {
+    const header = 'Date,Category,Amount,Type'
+    const rows = transactions.map((item) => `${item.date},${item.category},${item.amount},${item.type}`)
+    const csvContent = [header, ...rows].join('\n')
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement('a')
+
+    anchor.href = url
+    anchor.download = 'transactions.csv'
+    anchor.click()
+
+    URL.revokeObjectURL(url)
+  }
+
   return (
     <main className="mx-auto min-h-screen w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
@@ -69,11 +84,13 @@ const Dashboard = () => {
 
       <SummaryCards summary={summary} />
 
-      <section className="my-6 grid gap-4 lg:grid-cols-3">
-        <div className="lg:col-span-2">
+      <section className="my-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="md:col-span-2 h-full">
           <BalanceLineChart data={lineData} />
         </div>
-        <HealthScore score={healthScore} />
+        <div className="h-full">
+          <HealthScore score={healthScore} />
+        </div>
       </section>
 
       <section className="mb-6 grid gap-4 lg:grid-cols-2">
@@ -117,6 +134,7 @@ const Dashboard = () => {
       <TransactionTable
         rows={visibleTransactions}
         hasTransactions={transactions.length > 0}
+        onExport={handleExportCsv}
         role={role}
         searchTerm={searchTerm}
         onSearch={setSearchTerm}

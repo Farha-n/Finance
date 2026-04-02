@@ -60,6 +60,13 @@ src/
 - `useTransactions` centralizes list behavior (search/filter/sort) so table components remain presentation-focused.
 - Recharts provides responsive charting with low setup cost and clear composability.
 
+## Key Design Decisions
+
+- Used Context API for lightweight state management.
+- Chose Recharts for composability with React.
+- Added a Financial Health Score to provide actionable insight instead of raw data only.
+- Focused on simplicity and readability over feature overload.
+
 ## Local Development
 
 ```bash

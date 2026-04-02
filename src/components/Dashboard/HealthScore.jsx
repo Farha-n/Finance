@@ -15,7 +15,7 @@ const HealthScore = ({ score }) => {
   const scoreColor = getScoreColor(safeScore)
 
   return (
-    <section className="panel-card flex flex-col items-center justify-center gap-3">
+    <section className="panel-card h-full flex flex-col items-center justify-between gap-3">
       <h3 className="panel-title self-start">Financial Health Score</h3>
       <div
         className="relative grid size-40 place-items-center rounded-full"
