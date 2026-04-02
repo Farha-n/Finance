@@ -24,7 +24,7 @@ const BudgetTracker = ({ budgetData }) => {
       <p className={`mt-3 text-sm font-semibold ${isOverBudget ? 'text-rose-700' : 'text-slate-700'}`}>
         {isOverBudget
           ? `Over budget by $${Math.abs(budget - spent).toLocaleString()}`
-          : `$${remaining.toLocaleString()} remaining this month`}
+          : `You are within your budget for this month. Remaining: $${remaining.toLocaleString()}`}
       </p>
     </section>
   )

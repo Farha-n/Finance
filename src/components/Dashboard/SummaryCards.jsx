@@ -4,15 +4,19 @@ const cardStyles = {
   expense: 'from-expense to-rose-700 text-white',
 }
 
-const SummaryCards = ({ summary }) => {
+const SummaryCards = ({ summary, month }) => {
   const cards = [
-    { label: 'Total Balance', value: summary.balance, key: 'balance' },
-    { label: 'Income', value: summary.income, key: 'income' },
-    { label: 'Expenses', value: summary.expense, key: 'expense' },
+    { label: 'Balance (This Month)', value: summary.balance, key: 'balance' },
+    { label: 'Income (This Month)', value: summary.income, key: 'income' },
+    { label: 'Expenses (This Month)', value: summary.expense, key: 'expense' },
   ]
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <section>
+      <div className="mb-3 text-sm font-semibold text-slate-500">
+        {month ? `Active month: ${month}` : 'No active month selected'}
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {cards.map((card) => (
         <article
           key={card.key}
@@ -22,7 +26,8 @@ const SummaryCards = ({ summary }) => {
           <p className="mt-2 text-3xl font-bold">${card.value.toLocaleString()}</p>
         </article>
       ))}
-    </div>
+      </div>
+    </section>
   )
 }
 

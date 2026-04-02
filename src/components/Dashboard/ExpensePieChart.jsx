@@ -5,7 +5,7 @@ const COLORS = ['#1A6BFF', '#4F8CFF', '#7AA7FF', '#A5C3FF', '#D0DEFF']
 const ExpensePieChart = ({ data }) => {
   return (
     <section className="panel-card">
-      <h3 className="panel-title">Expense Categories</h3>
+      <h3 className="panel-title">Expense Categories (This Month)</h3>
       {data.length === 0 ? (
         <p className="empty-message">Only income recorded. No expense chart yet.</p>
       ) : (

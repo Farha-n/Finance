@@ -1,4 +1,4 @@
-import { useContext, useMemo, useState } from 'react'
+import { useContext, useEffect, useMemo, useState } from 'react'
 import RoleSwitcher from '../components/Common/RoleSwitcher'
 import BalanceLineChart from '../components/Dashboard/BalanceLineChart'
 import ExpensePieChart from '../components/Dashboard/ExpensePieChart'
@@ -12,6 +12,9 @@ import TransactionTable from '../components/Transactions/TransactionTable'
 import AppContext from '../context/AppContextObject'
 import { useTransactions } from '../hooks/useTransactions'
 import {
+  getAvailableMonthKeys,
+  filterTransactionsByMonth,
+  getActiveMonthKey,
   getBalanceTrendData,
   getBudgetProgress,
   getExpenseByCategory,
@@ -39,13 +42,37 @@ const Dashboard = () => {
 
   const [editingTransaction, setEditingTransaction] = useState(null)
   const [showForm, setShowForm] = useState(false)
+  const [selectedMonth, setSelectedMonth] = useState('')
 
-  const summary = useMemo(() => getSummary(transactions), [transactions])
+  const availableMonths = useMemo(() => getAvailableMonthKeys(transactions), [transactions])
+
+  useEffect(() => {
+    if (!availableMonths.length) {
+      setSelectedMonth('')
+      return
+    }
+
+    setSelectedMonth((current) => {
+      if (current && availableMonths.includes(current)) return current
+      return availableMonths[0]
+    })
+  }, [availableMonths])
+
+  const activeMonth = selectedMonth || getActiveMonthKey(transactions)
+  const monthlyTransactions = useMemo(
+    () => filterTransactionsByMonth(transactions, activeMonth),
+    [transactions, activeMonth],
+  )
+
+  const summary = useMemo(() => getSummary(monthlyTransactions), [monthlyTransactions])
   const healthScore = useMemo(() => getHealthScore(summary.income, summary.expense), [summary])
-  const lineData = useMemo(() => getBalanceTrendData(transactions), [transactions])
-  const pieData = useMemo(() => getExpenseByCategory(transactions), [transactions])
-  const insights = useMemo(() => getInsights(transactions), [transactions])
-  const budgetData = useMemo(() => getBudgetProgress(transactions, 6000), [transactions])
+  const lineData = useMemo(() => getBalanceTrendData(monthlyTransactions), [monthlyTransactions])
+  const pieData = useMemo(() => getExpenseByCategory(monthlyTransactions), [monthlyTransactions])
+  const insights = useMemo(() => getInsights(transactions, activeMonth), [transactions, activeMonth])
+  const budgetData = useMemo(
+    () => getBudgetProgress(transactions, 6000, activeMonth),
+    [transactions, activeMonth],
+  )
   const spendingSignal = useMemo(() => getSpendingSignal(summary.income, summary.expense), [summary])
 
   const handleSave = (payload) => {
@@ -85,10 +112,27 @@ const Dashboard = () => {
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand">Finance Pulse</p>
           <h1 className="text-3xl font-black text-slate-900 sm:text-4xl">Finance Dashboard</h1>
         </div>
-        <RoleSwitcher />
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white/80 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm backdrop-blur">
+            Month
+            <select
+              aria-label="Select analysis month"
+              value={activeMonth || ''}
+              onChange={(event) => setSelectedMonth(event.target.value)}
+              className="rounded-full border border-slate-200 px-3 py-1 text-sm outline-none transition focus:border-brand"
+            >
+              {availableMonths.map((month) => (
+                <option key={month} value={month}>
+                  {month}
+                </option>
+              ))}
+            </select>
+          </label>
+          <RoleSwitcher />
+        </div>
       </header>
 
-      <SummaryCards summary={summary} />
+      <SummaryCards summary={summary} month={activeMonth} />
 
       <section className="my-6 grid grid-cols-1 gap-4 md:grid-cols-3">
         <div className="md:col-span-2 h-full">
@@ -104,9 +148,9 @@ const Dashboard = () => {
         <Insights insights={insights} />
       </section>
 
-      <section className="mb-6 grid gap-4 lg:grid-cols-2">
+      <section className={`mb-6 grid gap-4 ${spendingSignal ? 'lg:grid-cols-2' : 'lg:grid-cols-1'}`}>
         <BudgetTracker budgetData={budgetData} />
-        <SpendingSignal signal={spendingSignal} />
+        {spendingSignal && <SpendingSignal signal={spendingSignal} />}
       </section>
 
       {transactions.length === 0 && <p className="empty-message mb-4">No transactions available.</p>}

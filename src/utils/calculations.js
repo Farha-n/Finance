@@ -17,6 +17,22 @@ export const getSummary = (transactions) => {
   }
 }
 
+export const getActiveMonthKey = (transactions) => {
+  if (!transactions.length) return null
+  const latest = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date))[0]
+  return latest.date.slice(0, 7)
+}
+
+export const getAvailableMonthKeys = (transactions) =>
+  [...new Set(transactions.map((item) => item.date.slice(0, 7)))].sort((a, b) =>
+    a < b ? 1 : -1,
+  )
+
+export const filterTransactionsByMonth = (transactions, monthKey) => {
+  if (!monthKey) return []
+  return transactions.filter((item) => item.date.slice(0, 7) === monthKey)
+}
+
 export const getHealthScore = (income, expense) => {
   if (income === 0) return 0
 
@@ -57,11 +73,14 @@ export const getExpenseByCategory = (transactions) => {
   return Object.entries(totals).map(([name, value]) => ({ name, value }))
 }
 
-export const getInsights = (transactions) => {
+export const getInsights = (transactions, monthKey = null) => {
+  const scopedTransactions = monthKey
+    ? filterTransactionsByMonth(transactions, monthKey)
+    : transactions
   const expenseTotals = {}
-  const summary = getSummary(transactions)
+  const summary = getSummary(scopedTransactions)
 
-  transactions.forEach((item) => {
+  scopedTransactions.forEach((item) => {
     if (item.type === 'expense') {
       expenseTotals[item.category] = (expenseTotals[item.category] || 0) + item.amount
     }
@@ -83,10 +102,18 @@ export const getInsights = (transactions) => {
   const months = Object.keys(monthTotals).sort()
   let monthlyChange = null
 
-  if (months.length >= 2) {
+  if (monthKey && months.includes(monthKey)) {
+    const currentIndex = months.indexOf(monthKey)
+    if (currentIndex > 0) {
+      const current = monthTotals[monthKey]
+      const previousMonth = months[currentIndex - 1]
+      const previous = monthTotals[previousMonth]
+      // Simple two-month comparison keeps the trend easy to explain during demos.
+      monthlyChange = previous === 0 ? 0 : Math.round(((current - previous) / previous) * 100)
+    }
+  } else if (months.length >= 2) {
     const current = monthTotals[months[months.length - 1]]
     const previous = monthTotals[months[months.length - 2]]
-    // Simple two-month comparison keeps the trend easy to explain during demos.
     monthlyChange = previous === 0 ? 0 : Math.round(((current - previous) / previous) * 100)
   }
 
@@ -104,50 +131,34 @@ export const getInsights = (transactions) => {
 
 export const getSpendingSignal = (income, expense) => {
   if (income === 0) {
-    return {
-      tone: 'neutral',
-      title: 'No income recorded yet',
-      message: 'Add at least one income transaction to unlock spending guidance.',
-    }
+    return null
   }
 
-  const expenseRatio = expense / income
-
-  if (expenseRatio >= 0.9) {
+  if (expense >= income) {
     return {
       tone: 'risk',
-      title: 'Expenses are approaching income',
-      message: 'Your spending is very close to your income. Consider reducing variable expenses.',
+      title: 'Expenses exceed income',
+      message: 'Your expenses are higher than your income this month. Reduce variable spending immediately.',
     }
   }
 
-  if (expenseRatio >= 0.75) {
+  if (expense >= income * 0.8) {
     return {
       tone: 'watch',
-      title: 'Spending is elevated',
-      message: 'Your expense ratio is trending high. Review recent categories to stay in control.',
+      title: 'Expenses are approaching income',
+      message: 'Your expenses are getting close to your income this month. Consider reviewing your top categories.',
     }
   }
 
-  return {
-    tone: 'healthy',
-    title: 'Spending is healthy',
-    message: 'Your spending remains controlled relative to income. Keep this momentum.',
-  }
+  return null
 }
 
-export const getBudgetProgress = (transactions, monthlyBudget = 5000) => {
-  const monthlyExpenses = {}
-
-  transactions.forEach((item) => {
-    if (item.type !== 'expense') return
-    const month = item.date.slice(0, 7)
-    monthlyExpenses[month] = (monthlyExpenses[month] || 0) + item.amount
-  })
-
-  const months = Object.keys(monthlyExpenses).sort()
-  const activeMonth = months.length ? months[months.length - 1] : null
-  const spent = activeMonth ? monthlyExpenses[activeMonth] : 0
+export const getBudgetProgress = (transactions, monthlyBudget = 5000, monthKey = null) => {
+  const activeMonth = monthKey || getActiveMonthKey(transactions)
+  const source = monthKey ? filterTransactionsByMonth(transactions, monthKey) : transactions
+  const spent = source
+    .filter((item) => item.type === 'expense')
+    .reduce((total, item) => total + item.amount, 0)
   const ratio = monthlyBudget === 0 ? 0 : spent / monthlyBudget
   const progress = Math.max(0, Math.min(100, Math.round(ratio * 100)))
 
