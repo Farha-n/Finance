@@ -51,7 +51,7 @@ const TransactionForm = ({ onSave, transaction, onCancel }) => {
 
     setErrorMessage('')
     onSave(formValues)
-    // TODO: add category suggestion dropdown fed by past user behavior.
+    // Resetting after save keeps repeated entry fast for admin users.
     setFormValues(initialState)
   }
 

@@ -9,6 +9,7 @@ const STORAGE_KEYS = {
 }
 
 const normalizeCategory = (category = '') =>
+  // Keep category labels consistent so analytics never split on casing/spacing.
   category
     .trim()
     .replace(/\s+/g, ' ')
@@ -64,7 +65,6 @@ export const AppProvider = ({ children }) => {
   const contextValue = useMemo(
     () => ({
       transactions,
-      setTransactions,
       addTransaction,
       updateTransaction,
       deleteTransaction,

@@ -112,7 +112,7 @@ const Dashboard = () => {
       {transactions.length === 0 && <p className="empty-message mb-4">No transactions available.</p>}
 
       {role === 'viewer' && (
-        // NOTE: Role-based logic is simulated on frontend only for demo purposes.
+        // For this assignment, role permissions are intentionally UI-only (no backend auth layer).
         <p className="mb-4 rounded-xl border border-blue-200 bg-blue-50 p-3 text-sm font-medium text-blue-800">
           Viewer mode: you can browse and analyze data. Switch to Admin to add, edit, or delete transactions.
         </p>
