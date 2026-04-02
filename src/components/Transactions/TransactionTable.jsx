@@ -22,7 +22,10 @@ const TransactionTable = ({
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h3 className="panel-title">Transactions</h3>
         <div className="flex flex-wrap gap-2">
-          <button onClick={onExport} className="btn-secondary">
+          <button
+            onClick={onExport}
+            className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 transition-all duration-200 hover:bg-slate-200"
+          >
             Export CSV
           </button>
           <input

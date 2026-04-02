@@ -28,7 +28,7 @@ const HealthScore = ({ score }) => {
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Score</p>
         </div>
       </div>
-      <p className="rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-700">
+      <p className="mt-2 rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-700">
         {getScoreLabel(safeScore)}
       </p>
     </section>
