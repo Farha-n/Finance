@@ -20,8 +20,14 @@ export const getSummary = (transactions) => {
 export const getHealthScore = (income, expense) => {
   if (income === 0) return 0
 
-  const ratio = (income - expense) / income
-  return Math.max(0, Math.min(100, Math.round(ratio * 100)))
+  const savingsRate = (income - expense) / income
+  let score = savingsRate * 70
+
+  if (expense < income * 0.7) {
+    score += 20
+  }
+
+  return Math.max(0, Math.min(100, Math.round(score)))
 }
 
 export const getBalanceTrendData = (transactions) => {
@@ -93,5 +99,64 @@ export const getInsights = (transactions) => {
     highestCategory,
     monthlyChange,
     savingsRate,
+  }
+}
+
+export const getSpendingSignal = (income, expense) => {
+  if (income === 0) {
+    return {
+      tone: 'neutral',
+      title: 'No income recorded yet',
+      message: 'Add at least one income transaction to unlock spending guidance.',
+    }
+  }
+
+  const expenseRatio = expense / income
+
+  if (expenseRatio >= 0.9) {
+    return {
+      tone: 'risk',
+      title: 'Expenses are approaching income',
+      message: 'Your spending is very close to your income. Consider reducing variable expenses.',
+    }
+  }
+
+  if (expenseRatio >= 0.75) {
+    return {
+      tone: 'watch',
+      title: 'Spending is elevated',
+      message: 'Your expense ratio is trending high. Review recent categories to stay in control.',
+    }
+  }
+
+  return {
+    tone: 'healthy',
+    title: 'Spending is healthy',
+    message: 'Your spending remains controlled relative to income. Keep this momentum.',
+  }
+}
+
+export const getBudgetProgress = (transactions, monthlyBudget = 5000) => {
+  const monthlyExpenses = {}
+
+  transactions.forEach((item) => {
+    if (item.type !== 'expense') return
+    const month = item.date.slice(0, 7)
+    monthlyExpenses[month] = (monthlyExpenses[month] || 0) + item.amount
+  })
+
+  const months = Object.keys(monthlyExpenses).sort()
+  const activeMonth = months.length ? months[months.length - 1] : null
+  const spent = activeMonth ? monthlyExpenses[activeMonth] : 0
+  const ratio = monthlyBudget === 0 ? 0 : spent / monthlyBudget
+  const progress = Math.max(0, Math.min(100, Math.round(ratio * 100)))
+
+  return {
+    month: activeMonth,
+    budget: monthlyBudget,
+    spent,
+    progress,
+    remaining: Math.max(0, monthlyBudget - spent),
+    isOverBudget: spent > monthlyBudget,
   }
 }

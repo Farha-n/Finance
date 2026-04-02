@@ -18,11 +18,14 @@ It combines dashboard visualization with interpretation-oriented metrics, includ
 	- Highest spending category
 	- Month-over-month expense change
 	- Savings rate
+- Monthly Budget Tracker with live progress and over-budget warning
+- Spending Signal panel that flags risky expense-to-income patterns
 - Transactions module with:
 	- Add, edit, delete (admin only)
 	- Search by category
 	- Filter by type (`all`, `income`, `expense`)
 	- Sorting by amount/date
+	- Input validation for amount/category/date
 - Role-based experience:
 	- `viewer`: read-only analytics
 	- `admin`: full transaction management
@@ -59,6 +62,7 @@ src/
 - Domain calculations are kept in `src/utils/calculations.js` to separate business logic from rendering.
 - `useTransactions` centralizes list behavior (search/filter/sort) so table components remain presentation-focused.
 - Recharts provides responsive charting with low setup cost and clear composability.
+- Categories are normalized at write-time to prevent analytics fragmentation (e.g., `food` vs `Food`).
 
 ## Key Design Decisions
 

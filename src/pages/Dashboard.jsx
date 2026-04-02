@@ -4,16 +4,20 @@ import BalanceLineChart from '../components/Dashboard/BalanceLineChart'
 import ExpensePieChart from '../components/Dashboard/ExpensePieChart'
 import HealthScore from '../components/Dashboard/HealthScore'
 import SummaryCards from '../components/Dashboard/SummaryCards'
+import BudgetTracker from '../components/Insights/BudgetTracker'
 import Insights from '../components/Insights/Insights'
+import SpendingSignal from '../components/Insights/SpendingSignal'
 import TransactionForm from '../components/Transactions/TransactionForm'
 import TransactionTable from '../components/Transactions/TransactionTable'
 import AppContext from '../context/AppContextObject'
 import { useTransactions } from '../hooks/useTransactions'
 import {
   getBalanceTrendData,
+  getBudgetProgress,
   getExpenseByCategory,
   getHealthScore,
   getInsights,
+  getSpendingSignal,
   getSummary,
 } from '../utils/calculations'
 
@@ -41,6 +45,8 @@ const Dashboard = () => {
   const lineData = useMemo(() => getBalanceTrendData(transactions), [transactions])
   const pieData = useMemo(() => getExpenseByCategory(transactions), [transactions])
   const insights = useMemo(() => getInsights(transactions), [transactions])
+  const budgetData = useMemo(() => getBudgetProgress(transactions, 6000), [transactions])
+  const spendingSignal = useMemo(() => getSpendingSignal(summary.income, summary.expense), [summary])
 
   const handleSave = (payload) => {
     if (editingTransaction) {
@@ -98,9 +104,15 @@ const Dashboard = () => {
         <Insights insights={insights} />
       </section>
 
+      <section className="mb-6 grid gap-4 lg:grid-cols-2">
+        <BudgetTracker budgetData={budgetData} />
+        <SpendingSignal signal={spendingSignal} />
+      </section>
+
       {transactions.length === 0 && <p className="empty-message mb-4">No transactions available.</p>}
 
       {role === 'viewer' && (
+        // NOTE: Role-based logic is simulated on frontend only for demo purposes.
         <p className="mb-4 rounded-xl border border-blue-200 bg-blue-50 p-3 text-sm font-medium text-blue-800">
           Viewer mode: you can browse and analyze data. Switch to Admin to add, edit, or delete transactions.
         </p>

@@ -8,6 +8,13 @@ const STORAGE_KEYS = {
   role: 'finance-dashboard-role',
 }
 
+const normalizeCategory = (category = '') =>
+  category
+    .trim()
+    .replace(/\s+/g, ' ')
+    .toLowerCase()
+    .replace(/\b\w/g, (char) => char.toUpperCase())
+
 export const AppProvider = ({ children }) => {
   const [transactions, setTransactions] = useState(() => {
     const storedTransactions = localStorage.getItem(STORAGE_KEYS.transactions)
@@ -29,6 +36,7 @@ export const AppProvider = ({ children }) => {
       id: uuidv4(),
       ...payload,
       amount: Number(payload.amount),
+      category: normalizeCategory(payload.category),
     }
 
     setTransactions((previous) => [newTransaction, ...previous])
@@ -42,6 +50,7 @@ export const AppProvider = ({ children }) => {
               ...item,
               ...payload,
               amount: Number(payload.amount),
+              category: normalizeCategory(payload.category),
             }
           : item,
       ),

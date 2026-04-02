@@ -15,8 +15,14 @@ export const useTransactions = () => {
     })
 
     return filtered.sort((a, b) => {
-      if (sortOrder === 'amount-desc') return b.amount - a.amount
-      if (sortOrder === 'amount-asc') return a.amount - b.amount
+      if (sortOrder === 'amount-desc') {
+        if (b.amount === a.amount) return new Date(b.date) - new Date(a.date)
+        return b.amount - a.amount
+      }
+      if (sortOrder === 'amount-asc') {
+        if (a.amount === b.amount) return new Date(a.date) - new Date(b.date)
+        return a.amount - b.amount
+      }
       if (sortOrder === 'date-desc') return new Date(b.date) - new Date(a.date)
       return new Date(a.date) - new Date(b.date)
     })

@@ -29,17 +29,28 @@ const TransactionTable = ({
             Export CSV
           </button>
           <input
+            aria-label="Search transactions by category"
             value={searchTerm}
             onChange={(event) => onSearch(event.target.value)}
             placeholder="Search category"
             className="input-control min-w-44"
           />
-          <select value={filter} onChange={(event) => onFilter(event.target.value)} className="input-control">
+          <select
+            aria-label="Filter transactions by type"
+            value={filter}
+            onChange={(event) => onFilter(event.target.value)}
+            className="input-control"
+          >
             <option value="all">All</option>
             <option value="income">Income</option>
             <option value="expense">Expense</option>
           </select>
-          <select value={sortOrder} onChange={(event) => onSort(event.target.value)} className="input-control">
+          <select
+            aria-label="Sort transactions"
+            value={sortOrder}
+            onChange={(event) => onSort(event.target.value)}
+            className="input-control"
+          >
             <option value="amount-desc">Amount: High to Low</option>
             <option value="amount-asc">Amount: Low to High</option>
             <option value="date-desc">Date: Newest</option>
@@ -54,7 +65,7 @@ const TransactionTable = ({
         </p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="min-w-full text-left text-sm">
+          <table aria-label="Transactions table" className="min-w-full text-left text-sm">
             <thead>
               <tr className="border-b border-slate-200 text-slate-500">
                 <th className="px-3 py-2 font-semibold">Date</th>
