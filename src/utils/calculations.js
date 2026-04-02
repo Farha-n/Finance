@@ -33,15 +33,28 @@ export const filterTransactionsByMonth = (transactions, monthKey) => {
   return transactions.filter((item) => item.date.slice(0, 7) === monthKey)
 }
 
-export const getHealthScore = (income, expense) => {
+const getPreviousMonthKey = (monthKey) => {
+  if (!monthKey) return null
+  const [year, month] = monthKey.split('-').map(Number)
+  const date = new Date(year, month - 2, 1)
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+}
+
+export const getHealthScore = (income, expense, budget, savingsTarget) => {
   if (income === 0) return 0
 
-  const savingsRate = (income - expense) / income
-  let score = savingsRate * 70
+  const actualSavings = income - expense
+  const safeTarget = savingsTarget > 0 ? savingsTarget : 1
+  let score = 0
 
-  if (expense < income * 0.7) {
-    score += 20
-  }
+  // Savings contribution
+  score += (actualSavings / safeTarget) * 50
+
+  // Budget discipline
+  if (expense <= budget) score += 30
+
+  // Baseline
+  score += 20
 
   return Math.max(0, Math.min(100, Math.round(score)))
 }
@@ -92,29 +105,34 @@ export const getInsights = (transactions, monthKey = null) => {
       )
     : null
 
-  const monthTotals = {}
-  transactions.forEach((item) => {
-    if (item.type !== 'expense') return
-    const month = item.date.slice(0, 7)
-    monthTotals[month] = (monthTotals[month] || 0) + item.amount
-  })
-
-  const months = Object.keys(monthTotals).sort()
   let monthlyChange = null
+  let trendMessage = 'Not enough data to show trend'
 
-  if (monthKey && months.includes(monthKey)) {
-    const currentIndex = months.indexOf(monthKey)
-    if (currentIndex > 0) {
-      const current = monthTotals[monthKey]
-      const previousMonth = months[currentIndex - 1]
-      const previous = monthTotals[previousMonth]
-      // Simple two-month comparison keeps the trend easy to explain during demos.
-      monthlyChange = previous === 0 ? 0 : Math.round(((current - previous) / previous) * 100)
+  if (scopedTransactions.length >= 2) {
+    const currentExpense = scopedTransactions
+      .filter((item) => item.type === 'expense')
+      .reduce((total, item) => total + item.amount, 0)
+
+    const previousMonthKey = getPreviousMonthKey(monthKey)
+    const prevTransactions = filterTransactionsByMonth(transactions, previousMonthKey)
+    const prevMonthExpense = prevTransactions
+      .filter((item) => item.type === 'expense')
+      .reduce((total, item) => total + item.amount, 0)
+
+    if (!prevMonthExpense) {
+      trendMessage = 'Not enough data to show trend'
+    } else if (currentExpense === 0 && prevMonthExpense > 0) {
+      trendMessage = 'Expenses dropped significantly compared to last month'
+      monthlyChange = -100
+    } else {
+      const change = ((currentExpense - prevMonthExpense) / prevMonthExpense) * 100
+      monthlyChange = Math.round(change)
+      if (change > 0) {
+        trendMessage = `Expenses increased by ~${Math.round(change)}% compared to last month`
+      } else {
+        trendMessage = `Expenses decreased by ~${Math.abs(Math.round(change))}% compared to last month`
+      }
     }
-  } else if (months.length >= 2) {
-    const current = monthTotals[months[months.length - 1]]
-    const previous = monthTotals[months[months.length - 2]]
-    monthlyChange = previous === 0 ? 0 : Math.round(((current - previous) / previous) * 100)
   }
 
   const savingsRate =
@@ -122,19 +140,26 @@ export const getInsights = (transactions, monthKey = null) => {
       ? 0
       : Math.max(0, Math.min(100, Math.round((summary.balance / summary.income) * 100)))
 
+  const savingsMessage =
+    summary.expense === 0
+      ? 'You had no expenses this month, resulting in a 100% savings rate.'
+      : `You're saving ${savingsRate}% of your income, which is ${savingsRate >= 50 ? 'a strong financial position.' : 'a solid baseline to improve from.'}`
+
   return {
     highestCategory,
     monthlyChange,
+    trendMessage,
     savingsRate,
+    savingsMessage,
   }
 }
 
-export const getSpendingSignal = (income, expense) => {
+export const getSpendingSignal = (income, expense, budget) => {
   if (income === 0) {
     return null
   }
 
-  if (expense >= income) {
+  if (expense > income) {
     return {
       tone: 'risk',
       title: 'Expenses exceed income',
@@ -142,7 +167,15 @@ export const getSpendingSignal = (income, expense) => {
     }
   }
 
-  if (expense >= income * 0.8) {
+  if (expense > budget) {
+    return {
+      tone: 'risk',
+      title: 'Expenses are above planned budget',
+      message: 'You are exceeding your planned budget for this month.',
+    }
+  }
+
+  if (expense > income * 0.8) {
     return {
       tone: 'watch',
       title: 'Expenses are approaching income',
@@ -153,21 +186,30 @@ export const getSpendingSignal = (income, expense) => {
   return null
 }
 
-export const getBudgetProgress = (transactions, monthlyBudget = 5000, monthKey = null) => {
-  const activeMonth = monthKey || getActiveMonthKey(transactions)
-  const source = monthKey ? filterTransactionsByMonth(transactions, monthKey) : transactions
-  const spent = source
-    .filter((item) => item.type === 'expense')
-    .reduce((total, item) => total + item.amount, 0)
-  const ratio = monthlyBudget === 0 ? 0 : spent / monthlyBudget
+export const getBudgetProgress = (income, expense, monthKey = null) => {
+  const budget = Math.round(income * 0.8)
+  const savingsTarget = Math.round(income * 0.2)
+  const actualSavings = income - expense
+  const spent = expense
+  const ratio = budget === 0 ? 0 : spent / budget
   const progress = Math.max(0, Math.min(100, Math.round(ratio * 100)))
 
+  const savingsMessage =
+    actualSavings >= savingsTarget
+      ? 'You met your savings goal this month.'
+      : 'You are below your savings target.'
+
   return {
-    month: activeMonth,
-    budget: monthlyBudget,
+    month: monthKey,
+    budget,
     spent,
     progress,
-    remaining: Math.max(0, monthlyBudget - spent),
-    isOverBudget: spent > monthlyBudget,
+    remaining: Math.max(0, budget - spent),
+    isOverBudget: spent > budget,
+    savingsTarget,
+    actualSavings,
+    savingsMessage,
+    explanation:
+      '80% of income is allocated for spending, and 20% is reserved for savings or investments.',
   }
 }

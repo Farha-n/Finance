@@ -59,21 +59,28 @@ const Dashboard = () => {
   }, [availableMonths])
 
   const activeMonth = selectedMonth || getActiveMonthKey(transactions)
+  // NOTE: All calculations are based on selected month to maintain consistency across dashboard.
   const monthlyTransactions = useMemo(
     () => filterTransactionsByMonth(transactions, activeMonth),
     [transactions, activeMonth],
   )
 
   const summary = useMemo(() => getSummary(monthlyTransactions), [monthlyTransactions])
-  const healthScore = useMemo(() => getHealthScore(summary.income, summary.expense), [summary])
+  const budgetData = useMemo(
+    () => getBudgetProgress(summary.income, summary.expense, activeMonth),
+    [summary, activeMonth],
+  )
+  const healthScore = useMemo(
+    () => getHealthScore(summary.income, summary.expense, budgetData.budget, budgetData.savingsTarget),
+    [summary, budgetData],
+  )
   const lineData = useMemo(() => getBalanceTrendData(monthlyTransactions), [monthlyTransactions])
   const pieData = useMemo(() => getExpenseByCategory(monthlyTransactions), [monthlyTransactions])
   const insights = useMemo(() => getInsights(transactions, activeMonth), [transactions, activeMonth])
-  const budgetData = useMemo(
-    () => getBudgetProgress(transactions, 6000, activeMonth),
-    [transactions, activeMonth],
+  const spendingSignal = useMemo(
+    () => getSpendingSignal(summary.income, summary.expense, budgetData.budget),
+    [summary, budgetData],
   )
-  const spendingSignal = useMemo(() => getSpendingSignal(summary.income, summary.expense), [summary])
 
   const handleSave = (payload) => {
     if (editingTransaction) {

@@ -12,7 +12,15 @@ const ExpensePieChart = ({ data }) => {
         <div className="h-72">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
-              <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} label>
+              <Pie
+                data={data}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={90}
+                label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
+              >
                 {data.map((entry, index) => (
                   <Cell key={`${entry.name}-${entry.value}`} fill={COLORS[index % COLORS.length]} />
                 ))}

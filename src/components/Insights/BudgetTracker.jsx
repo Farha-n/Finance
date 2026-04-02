@@ -1,5 +1,16 @@
 const BudgetTracker = ({ budgetData }) => {
-  const { month, budget, spent, remaining, progress, isOverBudget } = budgetData
+  const {
+    month,
+    budget,
+    spent,
+    remaining,
+    progress,
+    isOverBudget,
+    savingsTarget,
+    actualSavings,
+    savingsMessage,
+    explanation,
+  } = budgetData
 
   return (
     <section className="panel-card">
@@ -11,7 +22,11 @@ const BudgetTracker = ({ budgetData }) => {
       <div className="mt-4">
         <div className="mb-2 flex items-center justify-between text-sm font-semibold text-slate-700">
           <span>Spent: ${spent.toLocaleString()}</span>
-          <span>Budget: ${budget.toLocaleString()}</span>
+          <span>Budget (80%): ${budget.toLocaleString()}</span>
+        </div>
+        <div className="mb-2 flex items-center justify-between text-sm font-semibold text-slate-700">
+          <span>Savings Target (20%): ${savingsTarget.toLocaleString()}</span>
+          <span>Actual Savings: ${actualSavings.toLocaleString()}</span>
         </div>
         <div className="h-3 rounded-full bg-slate-200">
           <div
@@ -26,6 +41,10 @@ const BudgetTracker = ({ budgetData }) => {
           ? `Over budget by $${Math.abs(budget - spent).toLocaleString()}`
           : `You are within your budget for this month. Remaining: $${remaining.toLocaleString()}`}
       </p>
+      <p className={`mt-2 text-sm font-semibold ${actualSavings >= savingsTarget ? 'text-emerald-700' : 'text-amber-700'}`}>
+        {actualSavings >= savingsTarget ? `✅ ${savingsMessage}` : `⚠️ ${savingsMessage}`}
+      </p>
+      <p className="mt-2 text-xs leading-5 text-slate-500">{explanation}</p>
     </section>
   )
 }

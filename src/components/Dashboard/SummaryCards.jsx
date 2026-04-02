@@ -4,6 +4,11 @@ const cardStyles = {
   expense: 'from-expense to-rose-700 text-white',
 }
 
+const formatCurrency = (value) => {
+  if (value < 0) return `-$${Math.abs(value).toLocaleString()}`
+  return `$${value.toLocaleString()}`
+}
+
 const SummaryCards = ({ summary, month }) => {
   const cards = [
     { label: 'Balance (This Month)', value: summary.balance, key: 'balance' },
@@ -23,7 +28,7 @@ const SummaryCards = ({ summary, month }) => {
           className={`rounded-2xl bg-gradient-to-br p-5 shadow-lg transition-all duration-200 hover:scale-[1.01] hover:shadow-xl ${cardStyles[card.key]}`}
         >
           <p className="text-sm uppercase tracking-wider text-white/80">{card.label}</p>
-          <p className="mt-2 text-3xl font-bold">${card.value.toLocaleString()}</p>
+          <p className="mt-2 text-3xl font-bold">{formatCurrency(card.value)}</p>
         </article>
       ))}
       </div>
