@@ -81,7 +81,13 @@ const Dashboard = () => {
         <Insights insights={insights} />
       </section>
 
-      {transactions.length === 0 && <p className="empty-message mb-4">No data available</p>}
+      {transactions.length === 0 && <p className="empty-message mb-4">No transactions available.</p>}
+
+      {role === 'viewer' && (
+        <p className="mb-4 rounded-xl border border-blue-200 bg-blue-50 p-3 text-sm font-medium text-blue-800">
+          Viewer mode: you can browse and analyze data. Switch to Admin to add, edit, or delete transactions.
+        </p>
+      )}
 
       {role === 'admin' && (
         <section className="mb-4">
@@ -110,6 +116,7 @@ const Dashboard = () => {
 
       <TransactionTable
         rows={visibleTransactions}
+        hasTransactions={transactions.length > 0}
         role={role}
         searchTerm={searchTerm}
         onSearch={setSearchTerm}

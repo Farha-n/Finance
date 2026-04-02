@@ -53,6 +53,7 @@ export const getExpenseByCategory = (transactions) => {
 
 export const getInsights = (transactions) => {
   const expenseTotals = {}
+  const summary = getSummary(transactions)
 
   transactions.forEach((item) => {
     if (item.type === 'expense') {
@@ -74,7 +75,7 @@ export const getInsights = (transactions) => {
   })
 
   const months = Object.keys(monthTotals).sort()
-  let monthlyChange = 0
+  let monthlyChange = null
 
   if (months.length >= 2) {
     const current = monthTotals[months[months.length - 1]]
@@ -82,8 +83,14 @@ export const getInsights = (transactions) => {
     monthlyChange = previous === 0 ? 0 : Math.round(((current - previous) / previous) * 100)
   }
 
+  const savingsRate =
+    summary.income === 0
+      ? 0
+      : Math.max(0, Math.min(100, Math.round((summary.balance / summary.income) * 100)))
+
   return {
     highestCategory,
     monthlyChange,
+    savingsRate,
   }
 }

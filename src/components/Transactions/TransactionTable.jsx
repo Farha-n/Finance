@@ -5,6 +5,7 @@ const badgeStyles = {
 
 const TransactionTable = ({
   rows,
+  hasTransactions,
   role,
   searchTerm,
   onSearch,
@@ -41,7 +42,9 @@ const TransactionTable = ({
       </div>
 
       {rows.length === 0 ? (
-        <p className="empty-message">No transactions matched your current filters.</p>
+        <p className="empty-message">
+          {hasTransactions ? 'No transactions matched your current filters.' : 'No transactions available.'}
+        </p>
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-sm">
